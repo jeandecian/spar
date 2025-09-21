@@ -27,7 +27,20 @@ if [[ "$COMMAND" == "ip" ]]; then
 
         if [[ $NETWORK_ADDRESSES_COUNT -gt 0 ]]; then
             echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Found $NETWORK_ADDRESSES_COUNT unique network addresses: ${NETWORK_ADDRESSES_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')][NEXT] Suggested next command: 'nmap -sn ${NETWORK_ADDRESSES_ARRAY[@]}' to discover active hosts." | tee -a "$AUDIT_LOG_FILE"
+
+            for NETWORK_ADDRESS in "${NETWORK_ADDRESSES_ARRAY[@]}"; do
+                if [[ "$NETWORK_ADDRESS" == "127.0.0.1"* ]]; then
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Skipping loopback address '$NETWORK_ADDRESS'." | tee -a "$AUDIT_LOG_FILE"
+                    continue
+                fi
+
+                CLEAN_NETWORK_ADDRESS=$(echo "$NETWORK_ADDRESS" | tr '/' '_')
+
+                mkdir -p "output/${CLEAN_NETWORK_ADDRESS}"
+
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Created directory 'output/${CLEAN_NETWORK_ADDRESS}' for network address '$NETWORK_ADDRESS'." | tee -a "$AUDIT_LOG_FILE"
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')][NEXT] Suggested next command: 'nmap -sn ${NETWORK_ADDRESS}' to discover active hosts." | tee -a "$AUDIT_LOG_FILE"
+            done
         else
             echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] No network addresses found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
