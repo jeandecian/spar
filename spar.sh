@@ -2,22 +2,22 @@
 
 AUDIT_LOG_FILE="audit.log"
 
-echo "[$(date '+%Y-%m-%d %H:%M:%S')][USER] $@" | tee -a "$AUDIT_LOG_FILE"
+echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][USER] $@" | tee -a "$AUDIT_LOG_FILE"
 
 CLEAN_CMD_NAME=$(echo "$1" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 OUTPUT_FILE="output/${CLEAN_CMD_NAME}_$(date '+%Y%m%d_%H%M%S').log"
 
 if "$@" > "$OUTPUT_FILE" 2>&1; then
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')][SUCCESS] Command '$@' executed successfully and saved in '$OUTPUT_FILE'." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Command '$@' executed successfully and saved in '$OUTPUT_FILE'." | tee -a "$AUDIT_LOG_FILE"
 else
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')][ERROR] Command '$@' failed. Check '$OUTPUT_FILE' for details." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Command '$@' failed. Check '$OUTPUT_FILE' for details." | tee -a "$AUDIT_LOG_FILE"
 fi
 
 COMMAND="$1"
 
 if [[ "$COMMAND" == "ip" ]]; then
     if [[ "$2" == "a" || "$2" == "addr" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] '$@' was detected. Searching for network addresses in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
+        echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] '$@' was detected. Searching for network addresses in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
 
         NETWORK_ADDRESSES=$(grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}' "$OUTPUT_FILE" | sort -u)
 
@@ -26,11 +26,11 @@ if [[ "$COMMAND" == "ip" ]]; then
         NETWORK_ADDRESSES_COUNT=${#NETWORK_ADDRESSES_ARRAY[@]}
 
         if [[ $NETWORK_ADDRESSES_COUNT -gt 0 ]]; then
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Found $NETWORK_ADDRESSES_COUNT unique network addresses: ${NETWORK_ADDRESSES_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FIND] Found $NETWORK_ADDRESSES_COUNT unique network addresses: ${NETWORK_ADDRESSES_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
 
             for NETWORK_ADDRESS in "${NETWORK_ADDRESSES_ARRAY[@]}"; do
                 if [[ "$NETWORK_ADDRESS" == "127.0.0.1"* ]]; then
-                    echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Skipping loopback address '$NETWORK_ADDRESS'." | tee -a "$AUDIT_LOG_FILE"
+                    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Skipping loopback address '$NETWORK_ADDRESS'." | tee -a "$AUDIT_LOG_FILE"
                     continue
                 fi
 
@@ -38,16 +38,16 @@ if [[ "$COMMAND" == "ip" ]]; then
 
                 mkdir -p "output/${CLEAN_NETWORK_ADDRESS}"
 
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Created directory 'output/${CLEAN_NETWORK_ADDRESS}' for network address '$NETWORK_ADDRESS'." | tee -a "$AUDIT_LOG_FILE"
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')][NEXT] Suggested next command: 'nmap -sn ${NETWORK_ADDRESS}' to discover active hosts." | tee -a "$AUDIT_LOG_FILE"
+                echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Created directory 'output/${CLEAN_NETWORK_ADDRESS}' for network address '$NETWORK_ADDRESS'." | tee -a "$AUDIT_LOG_FILE"
+                echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][NEXT] Suggested next command: 'nmap -sn ${NETWORK_ADDRESS}' to discover active hosts." | tee -a "$AUDIT_LOG_FILE"
             done
         else
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] No network addresses found in the output." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] No network addresses found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
     fi
 elif [[ "$COMMAND" == "nmap" ]]; then
     if [[ "$2" == "-sn" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] '$@' was detected. Searching for active hosts in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
+        echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] '$@' was detected. Searching for active hosts in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
 
         ACTIVE_HOSTS=$(grep -Eo 'Nmap scan report for ([0-9]{1,3}\.){3}[0-9]{1,3}' "$OUTPUT_FILE" | awk '{print $5}' | sort -u)
 
@@ -56,10 +56,10 @@ elif [[ "$COMMAND" == "nmap" ]]; then
         ACTIVE_HOSTS_COUNT=${#ACTIVE_HOSTS_ARRAY[@]}
 
         if [[ $ACTIVE_HOSTS_COUNT -gt 0 ]]; then
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Found $ACTIVE_HOSTS_COUNT active hosts: ${ACTIVE_HOSTS_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')][NEXT] Suggested next command: 'nmap -A ${ACTIVE_HOSTS_ARRAY[@]}' for detailed scanning." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FIND] Found $ACTIVE_HOSTS_COUNT active hosts: ${ACTIVE_HOSTS_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][NEXT] Suggested next command: 'nmap -A ${ACTIVE_HOSTS_ARRAY[@]}' for detailed scanning." | tee -a "$AUDIT_LOG_FILE"
         else
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] No active hosts found in the output." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] No active hosts found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
     fi
 fi
