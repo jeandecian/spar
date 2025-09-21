@@ -46,7 +46,21 @@ if [[ "$COMMAND" == "ip" ]]; then
         fi
     fi
 elif [[ "$COMMAND" == "nmap" ]]; then
-    if [[ "$2" == "-sn" ]]; then
+    if [[ "$2" == "-A" ]]; then
+        echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] '$@' was detected. Searching for open ports in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
+
+        OPEN_PORTS=$(grep -Eo '([0-9]{1,5}/tcp|[0-9]{1,5}/udp) +open' "$OUTPUT_FILE" | awk '{print $1}' | sort -u)
+
+        mapfile -t OPEN_PORTS_ARRAY <<< "$OPEN_PORTS"
+
+        OPEN_PORTS_COUNT=${#OPEN_PORTS_ARRAY[@]}
+
+        if [[ $OPEN_PORTS_COUNT -gt 0 ]]; then
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FIND] Found $OPEN_PORTS_COUNT open ports: ${OPEN_PORTS_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
+        else
+            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] No open ports found in the output." | tee -a "$AUDIT_LOG_FILE"
+        fi
+    elif [[ "$2" == "-sn" ]]; then
         echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] '$@' was detected. Searching for active hosts in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
 
         ACTIVE_HOSTS=$(grep -Eo 'Nmap scan report for ([0-9]{1,3}\.){3}[0-9]{1,3}' "$OUTPUT_FILE" | awk '{print $5}' | sort -u)
