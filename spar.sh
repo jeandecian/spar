@@ -27,6 +27,7 @@ if [[ "$COMMAND" == "ip" ]]; then
 
         if [[ $NETWORK_ADDRESSES_COUNT -gt 0 ]]; then
             echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Found $NETWORK_ADDRESSES_COUNT unique network addresses: ${NETWORK_ADDRESSES_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')][NEXT] Suggested next command: 'nmap -sn ${NETWORK_ADDRESSES_ARRAY[@]}' to discover active hosts." | tee -a "$AUDIT_LOG_FILE"
         else
             echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] No network addresses found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
