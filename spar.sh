@@ -57,7 +57,16 @@ elif [[ "$COMMAND" == "nmap" ]]; then
 
         if [[ $ACTIVE_HOSTS_COUNT -gt 0 ]]; then
             echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FIND] Found $ACTIVE_HOSTS_COUNT active hosts: ${ACTIVE_HOSTS_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
-            echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][NEXT] Suggested next command: 'nmap -A ${ACTIVE_HOSTS_ARRAY[@]}' for detailed scanning." | tee -a "$AUDIT_LOG_FILE"
+
+            NETWORK_ADDRESS=$3
+            CLEAN_NETWORK_ADDRESS=$(echo "$NETWORK_ADDRESS" | tr '/' '_')
+
+            for ACTIVE_HOST in "${ACTIVE_HOSTS_ARRAY[@]}"; do
+                mkdir -p "output/${CLEAN_NETWORK_ADDRESS}/${ACTIVE_HOST}"
+
+                echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Created directory 'output/${CLEAN_NETWORK_ADDRESS}/${ACTIVE_HOST}' for active host '$ACTIVE_HOST'." | tee -a "$AUDIT_LOG_FILE"
+                echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][NEXT] Suggested next command: 'nmap -A ${ACTIVE_HOST}' for detailed scanning." | tee -a "$AUDIT_LOG_FILE"
+            done
         else
             echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] No active hosts found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
