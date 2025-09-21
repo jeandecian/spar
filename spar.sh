@@ -54,6 +54,14 @@ elif [[ "$COMMAND" == "nmap" ]]; then
 
         if [[ $OPEN_PORTS_COUNT -gt 0 ]]; then
             echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FIND] Found $OPEN_PORTS_COUNT open ports: ${OPEN_PORTS_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
+
+            for OPEN_PORT in "${OPEN_PORTS_ARRAY[@]}"; do
+                CLEAN_OPEN_PORT=$(echo "$OPEN_PORT" | awk -F'/' '{print $1}')
+                
+                mkdir -p "output/$3/${CLEAN_OPEN_PORT}"
+
+                echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Created directory 'output/$3/${CLEAN_OPEN_PORT}' for open port '$OPEN_PORT'." | tee -a "$AUDIT_LOG_FILE"
+            done
         else
             echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] No open ports found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
