@@ -12,7 +12,9 @@ if "$@" > "$OUTPUT_FILE" 2>&1; then
     echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Saving output to '$OUTPUT_FILE'." | tee -a "$AUDIT_LOG_FILE"
 else
     echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Command failed." | tee -a "$AUDIT_LOG_FILE"
-    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Check '$OUTPUT_FILE' for details." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Check '$OUTPUT_FILE' or below for details." | tee -a "$AUDIT_LOG_FILE"
+    cat "$OUTPUT_FILE" | tee -a "$AUDIT_LOG_FILE"
+    exit 1
 fi
 
 COMMAND="$1"
