@@ -8,9 +8,11 @@ CLEAN_CMD_NAME=$(echo "$1" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 OUTPUT_FILE="output/${CLEAN_CMD_NAME}_$(date '+%Y%m%d_%H%M%S').log"
 
 if "$@" > "$OUTPUT_FILE" 2>&1; then
-    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Command '$@' executed successfully and saved in '$OUTPUT_FILE'." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Command executed successfully." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][INFO] Saving output to '$OUTPUT_FILE'." | tee -a "$AUDIT_LOG_FILE"
 else
-    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Command '$@' failed. Check '$OUTPUT_FILE' for details." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Command failed." | tee -a "$AUDIT_LOG_FILE"
+    echo "[$(date '+%Y-%m-%d')][$(date '+%H:%M:%S')][FAIL] Check '$OUTPUT_FILE' for details." | tee -a "$AUDIT_LOG_FILE"
 fi
 
 COMMAND="$1"
