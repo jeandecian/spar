@@ -32,4 +32,21 @@ if [[ "$COMMAND" == "ip" ]]; then
             echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] No network addresses found in the output." | tee -a "$AUDIT_LOG_FILE"
         fi
     fi
+elif [[ "$COMMAND" == "nmap" ]]; then
+    if [[ "$2" == "-sn" ]]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] '$@' was detected. Searching for active hosts in '${OUTPUT_FILE}'." | tee -a "$AUDIT_LOG_FILE"
+
+        ACTIVE_HOSTS=$(grep -Eo 'Nmap scan report for ([0-9]{1,3}\.){3}[0-9]{1,3}' "$OUTPUT_FILE" | awk '{print $5}' | sort -u)
+
+        mapfile -t ACTIVE_HOSTS_ARRAY <<< "$ACTIVE_HOSTS"
+
+        ACTIVE_HOSTS_COUNT=${#ACTIVE_HOSTS_ARRAY[@]}
+
+        if [[ $ACTIVE_HOSTS_COUNT -gt 0 ]]; then
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] Found $ACTIVE_HOSTS_COUNT active hosts: ${ACTIVE_HOSTS_ARRAY[@]}." | tee -a "$AUDIT_LOG_FILE"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')][NEXT] Suggested next command: 'nmap -A ${ACTIVE_HOSTS_ARRAY[@]}' for detailed scanning." | tee -a "$AUDIT_LOG_FILE"
+        else
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')][SPAR] No active hosts found in the output." | tee -a "$AUDIT_LOG_FILE"
+        fi
+    fi
 fi
